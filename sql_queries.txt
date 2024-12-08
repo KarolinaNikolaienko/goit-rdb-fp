@@ -1,0 +1,70 @@
+---------Task1---------
+
+CREATE SCHEMA pandemic;
+
+USE pandemic;
+
+SELECT * FROM infectious_cases;
+
+---------Task2----------
+
+CREATE TABLE IF NOT EXISTS countries (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    Entity VARCHAR(30) NOT NULL,
+    Code VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS infectious_cases_ (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    Entity INT NOT NULL,
+    Year YEAR NOT NULL,
+    Number_yaws INT,
+    polio_cases INT,
+    cases_guinea_worm INT,
+    Number_rabies FLOAT,
+    Number_malaria FLOAT,
+    Number_hiv FLOAT,
+    Number_tuberculosis FLOAT,
+    Number_smallpox FLOAT,
+    Number_cholera_cases INT,
+    FOREIGN KEY (Entity) REFERENCES countries(id)
+);
+
+---------Task3----------
+
+SELECT ic.Entity, ic.Code, 
+	AVG(ic.Number_rabies) AS Average, 
+	MIN(ic.Number_rabies) AS Min,
+    MAX(ic.Number_rabies) AS Max,
+	SUM(ic.Number_rabies) AS Sum
+FROM infectious_cases AS ic 
+WHERE ic.Number_rabies != ''
+GROUP BY ic.Entity, ic.Code
+ORDER BY Average DESC
+LIMIT 10;
+
+---------Task4----------
+
+SELECT ic.Year, 
+	MAKEDATE(ic.Year, 1) AS 'January 1', CURDATE() AS Cur_date, 
+    timestampdiff(YEAR, MAKEDATE(ic.Year, 1), CURDATE()) AS Difference
+FROM infectious_cases AS ic;
+
+---------Task5----------
+
+DROP FUNCTION IF EXISTS Year_difference;
+DELIMITER //
+
+CREATE FUNCTION Year_difference(YEAR Year)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+	DECLARE res INT;
+    SET res = timestampdiff(YEAR, MAKEDATE(Year, 1), CURDATE());
+    RETURN res;
+END //
+
+DELIMITER ;
+
+SELECT ic.Year, Year_difference(ic.Year) AS Difference
+FROM infectious_cases AS ic;
